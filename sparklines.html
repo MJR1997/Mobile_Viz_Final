@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" type="text/css" href="css/stylesheet.css" media="screen">
+
+  <!-- CSS only -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+  <!-- JS, Popper.js, and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+    integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+    crossorigin="anonymous"></script>
+
+
+
+
+  <!-- Load D3-->
+  <script src="https://d3js.org/d3.v4.js"></script>
+
+   <!-- Navigation -->
+
+   <title>Mobile Viz Hub</title>
+
+
+
+   <nav class="navbar navbar-expand-lg navbar-light bg-light">
+     <a class="navbar-brand" href="#">Mobile Visualizations</a>
+     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+       <span class="navbar-toggler-icon"></span>
+     </button>
+     <div class="collapse navbar-collapse" id="navbarNavDropdown">
+       <ul class="navbar-nav mr-auto">
+         <li class="nav-item active">
+           <a class="nav-link" href="index.html">Home<span class="sr-only">(current)</span></a>
+         <li class="nav-item dropdown">
+           <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+             Visualizations
+           </a>
+           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+             <a class="dropdown-item" href="Line Chart.html">Line Chart</a>
+             <a class="dropdown-item" href="line.html">Interactive Line Chart</a>
+             <a class="dropdown-item" href="bar.html">Bar Chart</a>
+             <a class="dropdown-item" href="sparklines.html">Interactive Bar Chart</a>
+             <a class="dropdown-item" href="Evaluate.html">Evaluation</a>
+           </div>
+         </li>
+       </ul>
+     </div>
+   </nav>
+
+
+
+<body>
+
+  <!--- Pop Up box-->
+  <script defer src="script.js"></script>
+  <div class="form-row text-center">
+    <div class="col-12">
+      <button class="btn btn-info" id="myBtn"> Click for Instructions </button>
+    </div>
+  </div>
+  <div id="myModal" class="modal">
+
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h4>Interactive Bar Chart</h4>
+      <h5>An interactive Bar-Chart showing the weekly change in price of high demand items during the
+        2020 COVID-19 Pandemic </h5>
+      <p>List of Tasks for users to complete using the chart</p>
+      <p>1. What was the value of rice on week 5?</p>
+      <p>2. How much did the price of tomato puree change from week 1 to week 5?</p>
+      <p>3. Which item's price was the least effected during the 5 week period?</p>
+      <h4>Scroll Down to submit answers</h4>
+    </div>
+  </div>
+
+
+
+
+
+
+  <div id="drop" class="svg-container"></div>
+</body>
+
+<script>
+
+  var shown = "Products";
+  var options = ["Week_1", "Week_2", "Week_3", "Week_4", "Week_5"]
+  var selections = { "Week_1": "week_1", "Week_2": "week_2", "Week_3": "week_3", "Week_4": "week_4", "Week_5": "week_5" }
+
+  // set the dimensions and margins of the graph
+  var margin = { top: 40, right: 20, bottom: 30, left: 40 },
+    width = 600 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+  // set the ranges
+  var x = d3.scaleBand()
+    .range([0, width])
+    .padding(0.1);
+
+  var y = d3.scaleLinear()
+    .range([height, 90])
+    .domain([90, 105]);
+
+  d3.csv("products.csv", function (error, data) {
+    if (error) throw error;
+
+    //add dropdown
+    var selector = d3.select("#drop")
+      .append("select")
+      .on("change", function (d) { shown = d3.select(this).property('value'); drawChart(data); })
+
+    selector.selectAll("option")
+      .data(options)
+      .enter().append("option")
+      //return values from selection
+      .attr("value", function (d) {
+        return d;
+      })
+      //add text to selection box
+      .text(function (d) {
+        return d;
+      });
+
+    drawChart(data)
+  });
+  var drawChart = function (data) {
+    // for scaling
+    d3.selectAll("svg").remove()
+
+
+    var svg = d3.select("#drop").append("svg")
+      .attr("viewBox", "-40 -40 1200 800")
+      .append("g")
+      .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+    x.domain(data.map(function (d) { return d.product; }));
+    y.domain([97, d3.max(data, function (d) { return d[selections[shown]]; })]);
+
+    //append rectangles to the bar chart
+    svg.selectAll(".bar")
+      .data(data)
+      .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function (d) { return x(d.product); })
+      .attr("width", x.bandwidth())
+      .attr("y", function (d) { return y(d[selections[shown]]); })
+      .attr("height", function (d) { return height - y(d[selections[shown]]); })
+      .attr("fill", "#33FFFF");
+
+
+
+
+    // add the x Axis
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .style("font-size", "10px")
+      .call(d3.axisBottom(x));
+
+    // add the y Axis
+    svg.append("g")
+      .style("font-size", "10px")
+      .call(d3.axisLeft(y));
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+<div class="embed-responsive embed-responsive-16by9">
+<iframe 
+  src="https://docs.google.com/forms/d/e/1FAIpQLSfPMN2BjCyFktWOPG4Yl3FkaMpoPjuqONBtPbpd0kt4Rk4lQQ/viewform?embedded=true"
+  width="640" height="947" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+</html>

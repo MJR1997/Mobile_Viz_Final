@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<div id="page-wrap">
+
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <!-- Latest compiled and minified CSS -->
+   <link rel="stylesheet" type="text/css" href="css/stylesheet.css" media="screen">
+ 
+   <!-- CSS only -->
+ <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+ 
+ <!-- JS, Popper.js, and jQuery -->
+ <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+ <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+ <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+
+
+    <!-- Load D3-->
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <!-- Navigation -->
+
+  <title>Mobile Viz Hub</title>
+
+
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Mobile Visualizations</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="index.html">Home<span class="sr-only">(current)</span></a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Visualizations
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="Line Chart.html">Line Chart</a>
+            <a class="dropdown-item" href="line.html">Interactive Line Chart</a>
+            <a class="dropdown-item" href="bar.html">Bar Chart</a>
+            <a class="dropdown-item" href="sparklines.html">Interactive Bar Chart</a>
+            <a class="dropdown-item" href="Evaluate.html">Evaluation</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+
+
+
+  <body>
+
+    <!--- Pop Up box-->
+    <script defer src="script.js"></script>
+    <div class="form-row text-center">
+      <div class="col-12">
+        <button class="btn btn-info" id="myBtn"> Click for Instructions </button>
+      </div>
+    </div>
+    <div id="myModal" class="modal">
+
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h4>Interactive Line Chart</h4>
+        <h5>Line graph showing the change in online-prices of 4 hight-demand items during the 2020 COVID-19 pandemic
+        </h5>
+        <p>List of Tasks for users to complete using the chart</p>
+        <p>1. On week 8 what was the percentage increase or decrease of nappies from its original value?</p>
+        <p>2. Which product had the single largest increase in price from its original value over the 10 week period?
+        </p>
+        <p>3. Which products price changed the most from its original value at the end of the 10 week period?</p>
+        <h4>Scroll Down to submit answers</h4>
+      </div>
+    </div>
+
+    <p> </p>
+
+
+
+
+    <select class="form-control" id="selectButton"></select>
+    <div id="viz_1"></div>
+
+    <!-- Color Scale -->
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+    <script>
+
+      // set the dimensions and margins of the graph
+      var margin = { top: 10, right: 100, bottom: 30, left: 30 },
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+      // append the svg object to the div
+      var svg = d3.select("#viz_1")
+        .append("svg")
+        .attr("viewBox", "-40 -40 1200 800")
+        .append("g")
+        .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+      //Read the data
+      d3.csv("product_2.csv", function (data) {
+
+        // List of groups 
+        var allGroup = d3.map(data, function (d) { return (d.product) }).keys()
+
+        // add the options to the button
+        d3.select("#selectButton")
+          .selectAll('myOptions')
+          .data(allGroup)
+          .enter()
+          .append('option')
+          .text(function (d) { return d; }) // text showen in drop down menu
+          .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+        // color scale 
+        var myColor = d3.scaleOrdinal()
+          .domain(allGroup)
+          .range(d3.schemeSet1);
+
+        // Add X axis 
+        var x_1 = d3.scaleLinear()
+          .domain([1, 10])
+          .range([0, width]);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x_1));
+
+        // Add Y axis
+        var y_1 = d3.scaleLinear()
+          .domain([90, 110])
+          .range([height, 0]);
+        svg.append("g")
+          .call(d3.axisLeft(y_1));
+
+        // Initialize line with first group
+        var line = svg
+          .append('g')
+          .append("path")
+          .datum(data.filter(function (d) { return d.product == allGroup[0] }))
+          .attr("d", d3.line()
+            .x(function (d) { return x_1(+d.week) })
+            .y(function (d) { return y_1(+d.change) })
+          )
+          .attr("stroke", function (d) { return myColor("valueA") })
+          .style("stroke-width", 4)
+          .style("fill", "none")
+
+        // function that updates the chart
+        function update(selectedGroup) {
+
+          var dataUpdate = data.filter(function (d) { return d.product == selectedGroup })
+
+          // Give these new data to update line
+          line
+            .datum(dataUpdate)
+            .transition()
+            .duration(1000)
+            .attr("d", d3.line()
+              .x(function (d) { return x_1(+d.week) })
+              .y(function (d) { return y_1(+d.change) })
+            )
+            .attr("stroke", function (d) { return myColor(selectedGroup) })
+        }
+
+        // When the button is used, run the updateChart function
+        d3.select("#selectButton").on("change", function (d) {
+          // recover the option that has been chosen
+          var selectedOption = d3.select(this).property("value")
+          // run the updateChart function with this selected option
+          update(selectedOption)
+        })
+      })
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+<div class="embed-responsive embed-responsive-16by9">
+<iframe
+  src="https://docs.google.com/forms/d/e/1FAIpQLScKjXB-gaawFdWZ9p4SPfGqVAUmbTbujwyJAm4m88fGC7lIKA/viewform?embedded=true"
+  width="640" height="971" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+</div>
+
+
+</body>
